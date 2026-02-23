@@ -152,13 +152,14 @@ internal static class Strings
         $"Intune Intake - {deviceName} - {serial}";
 
     public static string EmailBody(string deviceName, string serial, string user,
-        bool hashCollected, bool enrollAttempted, bool enrollSuccess) =>
+        string hardwareHash, bool hashCollected, bool enrollAttempted, bool enrollSuccess) =>
         L(
             $"Hello,{Environment.NewLine}{Environment.NewLine}" +
             $"please find the generated Intune prep files from this device." +
             $"{Environment.NewLine}{Environment.NewLine}" +
             $"Device: {deviceName}{Environment.NewLine}" +
             $"Serial: {serial}{Environment.NewLine}" +
+            $"Hardware Hash: {(hashCollected ? hardwareHash : "N/A")}{Environment.NewLine}" +
             $"Collected by: {user}{Environment.NewLine}" +
             $"HashCollected: {hashCollected}{Environment.NewLine}" +
             $"AutoEnrollAttempted: {enrollAttempted}{Environment.NewLine}" +
@@ -169,6 +170,7 @@ internal static class Strings
             $"{Environment.NewLine}{Environment.NewLine}" +
             $"Gerät: {deviceName}{Environment.NewLine}" +
             $"Seriennummer: {serial}{Environment.NewLine}" +
+            $"Hardware-Hash: {(hashCollected ? hardwareHash : "N/A")}{Environment.NewLine}" +
             $"Erfasst von: {user}{Environment.NewLine}" +
             $"Hash erfasst: {hashCollected}{Environment.NewLine}" +
             $"Registrierung versucht: {enrollAttempted}{Environment.NewLine}" +

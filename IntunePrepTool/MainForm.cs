@@ -338,6 +338,7 @@ internal sealed class MainForm : Form
             _latestResult.DeviceName,
             serial,
             _latestResult.CurrentUser,
+            _latestResult.HardwareHash,
             _latestResult.HashCollectionSucceeded,
             _latestEnrollmentResult?.Attempted ?? false,
             _latestEnrollmentResult?.Succeeded ?? false);
