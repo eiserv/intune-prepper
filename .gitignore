@@ -1,0 +1,9 @@
+.vs/
+bin/
+obj/
+dist/
+.dotnet_cli_home/
+*.user
+*.suo
+*.pdb
+*.cache

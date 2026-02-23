@@ -1,0 +1,7 @@
+# Intune Prep Tool configuration
+admin_recipient_email: "example@email.com"
+output_folder_name: "IntunePrepOutput"
+intune_autopilot_import_url: "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView"
+auto_enroll_command: "%windir%\\system32\\deviceenroller.exe /c /AutoEnrollMDM"
+default_run_auto_enroll: false
+default_auto_enroll_only: false
