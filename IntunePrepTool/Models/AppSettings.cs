@@ -9,6 +9,8 @@ internal sealed record AppSettings
     public string AutoEnrollCommand { get; init; } = @"%windir%\system32\deviceenroller.exe /c /AutoEnrollMDM";
     public bool DefaultRunAutoEnroll { get; init; }
     public bool DefaultAutoEnrollOnly { get; init; }
+    public string Language { get; init; } = "en";
+    public bool PreferOutlookCom { get; init; }
     public string ConfigPath { get; init; } = string.Empty;
     public string ConfigWarning { get; init; } = string.Empty;
 }

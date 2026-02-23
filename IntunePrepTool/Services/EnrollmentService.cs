@@ -6,6 +6,9 @@ namespace IntunePrepTool.Services;
 
 internal sealed class EnrollmentService
 {
+    /// <summary>HRESULT 0x8018000A – device is already MDM-enrolled.</summary>
+    private const int MENROLL_E_DEVICE_ALREADY_ENROLLED = unchecked((int)0x8018000A);
+
     private readonly PowerShellRunner _powerShellRunner = new();
 
     public async Task<EnrollmentAttemptResult> TryAutoEnrollAsync(
@@ -24,7 +27,7 @@ internal sealed class EnrollmentService
                 AzureAdJoined = false,
                 MdmUrlPresent = mdmUrlPresent,
                 Command = configuredCommand,
-                StatusMessage = "Skipped: device is not Azure AD joined (dsregcmd reports AzureAdJoined : NO)."
+                StatusMessage = Strings.EnrollSkippedNotJoined
             };
         }
 
@@ -44,11 +47,20 @@ internal sealed class EnrollmentService
 
         Task<string> outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         Task<string> errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
+
+        // Await streams and process exit together to avoid potential deadlocks.
+        await Task.WhenAll(outputTask, errorTask, process.WaitForExitAsync(cancellationToken));
 
         string events = await QueryRecentEnrollmentEventsAsync(cancellationToken);
         int exitCode = process.ExitCode;
-        bool succeeded = exitCode == 0;
+        bool alreadyEnrolled = exitCode == MENROLL_E_DEVICE_ALREADY_ENROLLED;
+        bool succeeded = exitCode == 0 || alreadyEnrolled;
+
+        string statusMessage = alreadyEnrolled
+            ? Strings.EnrollAlreadyEnrolled
+            : succeeded
+                ? Strings.EnrollSucceeded
+                : Strings.EnrollFailed;
 
         return new EnrollmentAttemptResult
         {
@@ -60,9 +72,7 @@ internal sealed class EnrollmentService
             AzureAdJoined = azureAdJoined,
             MdmUrlPresent = mdmUrlPresent,
             Command = configuredCommand,
-            StatusMessage = succeeded
-                ? "Auto-enrollment command executed. Check Intune enrollment state and event log details."
-                : "Auto-enrollment command failed. Review stderr and event log snippets.",
+            StatusMessage = statusMessage,
             EnrollmentEvents = events
         };
     }

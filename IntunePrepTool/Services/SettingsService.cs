@@ -29,6 +29,8 @@ internal static class SettingsService
                 AutoEnrollCommand = GetString(values, "auto_enroll_command", defaults.AutoEnrollCommand),
                 DefaultRunAutoEnroll = GetBool(values, "default_run_auto_enroll", defaults.DefaultRunAutoEnroll),
                 DefaultAutoEnrollOnly = GetBool(values, "default_auto_enroll_only", defaults.DefaultAutoEnrollOnly),
+                Language = GetString(values, "language", defaults.Language),
+                PreferOutlookCom = GetBool(values, "prefer_outlook_com", defaults.PreferOutlookCom),
                 ConfigPath = configPath,
                 ConfigWarning = string.Empty
             };

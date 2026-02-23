@@ -99,7 +99,7 @@ internal sealed class ExportService
             ? "(none)"
             : enrollmentResult.EnrollmentEvents);
 
-        File.WriteAllText(reportPath, reportBuilder.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        File.WriteAllText(reportPath, reportBuilder.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         return reportPath;
     }
 
@@ -123,7 +123,7 @@ internal sealed class ExportService
         builder.AppendLine("DSREGCMD /STATUS");
         builder.AppendLine(result.DsregStatus);
 
-        File.WriteAllText(reportPath, builder.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        File.WriteAllText(reportPath, builder.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         return reportPath;
     }
 

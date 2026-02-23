@@ -1,7 +1,9 @@
 param(
     [string]$ProjectPath = ".\IntunePrepTool\IntunePrepTool.csproj",
     [string]$OutputPath = ".\dist",
-    [switch]$FrameworkDependent
+    [switch]$FrameworkDependent,
+    [ValidateSet("en", "de")]
+    [string]$Language
 )
 
 $ErrorActionPreference = "Stop"
@@ -25,6 +27,17 @@ else {
 
 if ($LASTEXITCODE -ne 0) {
     throw "Publish failed. For self-contained output, make sure internet access to nuget.org is available."
+}
+
+# Patch the published config.yaml with the chosen language if specified.
+if ($Language) {
+    $configFile = Join-Path $OutputPath "config.yaml"
+    if (Test-Path $configFile) {
+        $content = Get-Content $configFile -Raw
+        $content = $content -replace '(?m)^language:\s*"[^"]*"', "language: `"$Language`""
+        Set-Content $configFile -Value $content -NoNewline
+        Write-Host "Language set to '$Language' in published config.yaml"
+    }
 }
 
 Write-Host ""

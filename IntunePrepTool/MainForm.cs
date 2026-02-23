@@ -49,16 +49,16 @@ internal sealed class MainForm : Form
         }
         else
         {
-            _configStatus.Text = $"Loaded config from {_settings.ConfigPath}";
-            AppendStatus($"Config loaded from {_settings.ConfigPath}");
+            _configStatus.Text = Strings.ConfigLoaded(_settings.ConfigPath);
+            AppendStatus(Strings.ConfigLoadedStatus(_settings.ConfigPath));
         }
 
-        AppendStatus("Ready.");
+        AppendStatus(Strings.Ready);
     }
 
     private void InitializeUi()
     {
-        Text = "Intune Prep Tool";
+        Text = Strings.WindowTitle;
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(980, 760);
 
@@ -80,9 +80,7 @@ internal sealed class MainForm : Form
         Label intro = new()
         {
             AutoSize = true,
-            Text =
-                "Use this tool to export Autopilot hash and optionally trigger MDM auto-enrollment.\n" +
-                "Run as local administrator for reliable results.",
+            Text = Strings.IntroText,
             MaximumSize = new Size(920, 0)
         };
         root.Controls.Add(intro, 0, 0);
@@ -102,15 +100,15 @@ internal sealed class MainForm : Form
         formPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
         root.Controls.Add(formPanel, 0, 2);
 
-        Label groupTagLabel = new() { Text = "Group Tag", AutoSize = true, Anchor = AnchorStyles.Left };
+        Label groupTagLabel = new() { Text = Strings.GroupTag, AutoSize = true, Anchor = AnchorStyles.Left };
         _groupTagInput.Dock = DockStyle.Fill;
         _groupTagInput.Margin = new Padding(12, 4, 0, 8);
 
-        Label assignedUserLabel = new() { Text = "Assigned User (UPN)", AutoSize = true, Anchor = AnchorStyles.Left };
+        Label assignedUserLabel = new() { Text = Strings.AssignedUserUpn, AutoSize = true, Anchor = AnchorStyles.Left };
         _assignedUserInput.Dock = DockStyle.Fill;
         _assignedUserInput.Margin = new Padding(12, 4, 0, 8);
 
-        Label recipientLabel = new() { Text = "Admin Recipient", AutoSize = true, Anchor = AnchorStyles.Left };
+        Label recipientLabel = new() { Text = Strings.AdminRecipient, AutoSize = true, Anchor = AnchorStyles.Left };
         Label recipientValue = new()
         {
             Text = _settings.AdminRecipientEmail,
@@ -118,14 +116,14 @@ internal sealed class MainForm : Form
             Margin = new Padding(12, 8, 0, 8)
         };
 
-        Label modeLabel = new() { Text = "Workflow Mode", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
+        Label modeLabel = new() { Text = Strings.WorkflowMode, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
         FlowLayoutPanel modePanel = new() { AutoSize = true, Margin = new Padding(8, 4, 0, 8) };
 
-        _autoEnrollOnlyCheckbox.Text = "Auto-enroll only (skip hash export)";
+        _autoEnrollOnlyCheckbox.Text = Strings.AutoEnrollOnly;
         _autoEnrollOnlyCheckbox.AutoSize = true;
         _autoEnrollOnlyCheckbox.CheckedChanged += (_, _) => ApplyModeToggle();
 
-        _runAutoEnrollCheckbox.Text = "Also run auto-enrollment after export";
+        _runAutoEnrollCheckbox.Text = Strings.AlsoRunAutoEnroll;
         _runAutoEnrollCheckbox.AutoSize = true;
 
         modePanel.Controls.Add(_autoEnrollOnlyCheckbox);
@@ -159,7 +157,7 @@ internal sealed class MainForm : Form
         root.Controls.Add(bottom, 0, 4);
 
         _resultSummary.AutoSize = true;
-        _resultSummary.Text = "No run yet.";
+        _resultSummary.Text = Strings.NoRunYet;
         _resultSummary.Margin = new Padding(0, 0, 0, 8);
         bottom.Controls.Add(_resultSummary, 0, 0);
 
@@ -171,25 +169,25 @@ internal sealed class MainForm : Form
         };
         bottom.Controls.Add(buttonRow, 0, 1);
 
-        _runWorkflowButton.Text = "Run Workflow";
+        _runWorkflowButton.Text = Strings.RunWorkflow;
         _runWorkflowButton.AutoSize = true;
         _runWorkflowButton.Click += async (_, _) => await RunWorkflowAsync();
 
-        _openFolderButton.Text = "Open Output Folder";
+        _openFolderButton.Text = Strings.OpenOutputFolder;
         _openFolderButton.AutoSize = true;
         _openFolderButton.Enabled = false;
         _openFolderButton.Click += (_, _) => OpenOutputFolder();
 
-        _mailButton.Text = "Open Email Draft";
+        _mailButton.Text = Strings.OpenEmailDraft;
         _mailButton.AutoSize = true;
         _mailButton.Enabled = false;
         _mailButton.Click += (_, _) => OpenEmailDraft();
 
-        _openIntuneButton.Text = "Open Intune Import Page";
+        _openIntuneButton.Text = Strings.OpenIntuneImportPage;
         _openIntuneButton.AutoSize = true;
         _openIntuneButton.Click += (_, _) => OpenUrl(_settings.IntuneAutopilotImportUrl);
 
-        _copyButton.Text = "Copy Metadata";
+        _copyButton.Text = Strings.CopyMetadata;
         _copyButton.AutoSize = true;
         _copyButton.Enabled = false;
         _copyButton.Click += (_, _) => CopyMetadataToClipboard();
@@ -228,8 +226,8 @@ internal sealed class MainForm : Form
         if (!autoEnrollOnly && (string.IsNullOrWhiteSpace(groupTag) || string.IsNullOrWhiteSpace(assignedUser)))
         {
             MessageBox.Show(
-                "Group Tag and Assigned User are required for hardware hash export mode.",
-                "Validation",
+                Strings.ValidationGroupTagRequired,
+                Strings.ValidationTitle,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
             return;
@@ -238,7 +236,7 @@ internal sealed class MainForm : Form
         ToggleBusy(isBusy: true);
         _latestAttachments.Clear();
         _latestEnrollmentResult = null;
-        AppendStatus($"Starting workflow. Auto-enroll-only mode: {autoEnrollOnly}");
+        AppendStatus(Strings.StartingWorkflow(autoEnrollOnly));
 
         try
         {
@@ -247,7 +245,7 @@ internal sealed class MainForm : Form
 
             if (!_latestResult.IsCurrentUserAdmin)
             {
-                AppendStatus("Warning: current user is not admin. Auto-enrollment command may fail.");
+                AppendStatus(Strings.WarningNotAdmin);
             }
 
             if (!autoEnrollOnly)
@@ -256,27 +254,27 @@ internal sealed class MainForm : Form
                 {
                     string csvPath = _exportService.WriteAutopilotCsv(_latestResult, groupTag, assignedUser, _latestOutputFolder);
                     _latestAttachments.Add(csvPath);
-                    _resultSummary.Text = $"Hash export completed for serial '{Safe(_latestResult.SerialNumber)}'.";
-                    AppendStatus($"Hardware hash export successful: {csvPath}");
+                    _resultSummary.Text = Strings.HashExportCompleted(Safe(_latestResult.SerialNumber));
+                    AppendStatus(Strings.HashExportSuccess(csvPath));
                 }
                 else
                 {
                     string errorReport = _exportService.WriteHashCollectionErrorReport(_latestResult, _latestOutputFolder);
                     _latestAttachments.Add(errorReport);
-                    _resultSummary.Text = "Hardware hash export failed. Error report created.";
-                    AppendStatus($"Hardware hash export failed: {Safe(_latestResult.FailureReason)}");
-                    AppendStatus($"Error report saved to: {errorReport}");
+                    _resultSummary.Text = Strings.HashExportFailedSummary;
+                    AppendStatus(Strings.HashExportFailed(Safe(_latestResult.FailureReason)));
+                    AppendStatus(Strings.ErrorReportSaved(errorReport));
                 }
             }
             else
             {
-                _resultSummary.Text = "Auto-enroll-only mode selected; hash export skipped.";
-                AppendStatus("Hardware hash step skipped due to selected workflow mode.");
+                _resultSummary.Text = Strings.AutoEnrollOnlySummary;
+                AppendStatus(Strings.HashSkippedByMode);
             }
 
             if (runAutoEnroll)
             {
-                AppendStatus("Running auto-enrollment command...");
+                AppendStatus(Strings.RunningAutoEnroll);
                 _latestEnrollmentResult = await _enrollmentService.TryAutoEnrollAsync(_latestResult, _settings.AutoEnrollCommand);
 
                 string enrollmentReport = _exportService.WriteEnrollmentReport(
@@ -287,20 +285,22 @@ internal sealed class MainForm : Form
                     assignedUser);
 
                 _latestAttachments.Add(enrollmentReport);
-                AppendStatus($"Enrollment report saved to: {enrollmentReport}");
-                AppendStatus($"Auto-enrollment status: {_latestEnrollmentResult.StatusMessage}");
+                AppendStatus(Strings.EnrollmentReportSaved(enrollmentReport));
+                AppendStatus(Strings.AutoEnrollStatus(_latestEnrollmentResult.StatusMessage));
 
                 if (_latestEnrollmentResult.Attempted && _latestEnrollmentResult.Succeeded)
                 {
-                    _resultSummary.Text = "Workflow completed. Auto-enrollment command executed.";
+                    _resultSummary.Text = _latestEnrollmentResult.ExitCode == unchecked((int)0x8018000A)
+                        ? Strings.WorkflowCompleteAlreadyEnrolled
+                        : Strings.WorkflowCompleteEnrolled;
                 }
                 else if (_latestEnrollmentResult.Attempted)
                 {
-                    _resultSummary.Text = "Workflow completed, but auto-enrollment command reported failure.";
+                    _resultSummary.Text = Strings.WorkflowCompleteEnrollFailed;
                 }
                 else
                 {
-                    _resultSummary.Text = "Workflow completed. Auto-enrollment was skipped based on join-state checks.";
+                    _resultSummary.Text = Strings.WorkflowCompleteEnrollSkipped;
                 }
             }
 
@@ -310,11 +310,11 @@ internal sealed class MainForm : Form
         }
         catch (Exception exception)
         {
-            _resultSummary.Text = "Workflow failed unexpectedly.";
-            AppendStatus($"Unexpected error: {exception.Message}");
+            _resultSummary.Text = Strings.WorkflowFailed;
+            AppendStatus(Strings.UnexpectedError(exception.Message));
             MessageBox.Show(
-                $"Unexpected error: {exception.Message}",
-                "Error",
+                Strings.UnexpectedError(exception.Message),
+                Strings.ErrorTitle,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -328,32 +328,30 @@ internal sealed class MainForm : Form
     {
         if (_latestResult is null || _latestAttachments.Count == 0)
         {
-            AppendStatus("No generated files found. Run workflow first.");
+            AppendStatus(Strings.NoFilesForEmail);
             return;
         }
 
         string serial = Safe(_latestResult.SerialNumber);
-        string subject = $"Intune Intake - {_latestResult.DeviceName} - {serial}";
-        string body =
-            $"Hello,{Environment.NewLine}{Environment.NewLine}" +
-            "please find the generated Intune prep files from this device." +
-            $"{Environment.NewLine}{Environment.NewLine}" +
-            $"Device: {_latestResult.DeviceName}{Environment.NewLine}" +
-            $"Serial: {serial}{Environment.NewLine}" +
-            $"Collected by: {_latestResult.CurrentUser}{Environment.NewLine}" +
-            $"HashCollected: {_latestResult.HashCollectionSucceeded}{Environment.NewLine}" +
-            $"AutoEnrollAttempted: {_latestEnrollmentResult?.Attempted ?? false}{Environment.NewLine}" +
-            $"AutoEnrollSuccess: {_latestEnrollmentResult?.Succeeded ?? false}{Environment.NewLine}" +
-            $"{Environment.NewLine}Thanks.";
+        string subject = Strings.EmailSubject(_latestResult.DeviceName, serial);
+        string body = Strings.EmailBody(
+            _latestResult.DeviceName,
+            serial,
+            _latestResult.CurrentUser,
+            _latestResult.HashCollectionSucceeded,
+            _latestEnrollmentResult?.Attempted ?? false,
+            _latestEnrollmentResult?.Succeeded ?? false);
 
-        bool usedOutlook = _emailService.OpenDraft(_settings.AdminRecipientEmail, subject, body, _latestAttachments);
+        bool usedOutlook = _emailService.OpenDraft(
+            _settings.AdminRecipientEmail, subject, body, _latestAttachments,
+            _settings.PreferOutlookCom);
         if (usedOutlook)
         {
-            AppendStatus("Email draft opened in Outlook with attachments.");
+            AppendStatus(Strings.EmailDraftOutlook);
         }
         else
         {
-            AppendStatus("Email draft opened in default mail app. Attach generated files manually if needed.");
+            AppendStatus(Strings.EmailDraftDefault);
         }
     }
 
@@ -361,7 +359,7 @@ internal sealed class MainForm : Form
     {
         if (string.IsNullOrWhiteSpace(_latestOutputFolder) || !Directory.Exists(_latestOutputFolder))
         {
-            AppendStatus("Output folder is not available yet.");
+            AppendStatus(Strings.OutputFolderNotAvailable);
             return;
         }
 
@@ -385,7 +383,7 @@ internal sealed class MainForm : Form
     {
         if (_latestResult is null)
         {
-            AppendStatus("No metadata available yet.");
+            AppendStatus(Strings.NoMetadataAvailable);
             return;
         }
 
@@ -399,7 +397,7 @@ internal sealed class MainForm : Form
             $"AutoEnrollSucceeded: {_latestEnrollmentResult?.Succeeded ?? false}";
 
         Clipboard.SetText(metadata);
-        AppendStatus("Metadata copied to clipboard.");
+        AppendStatus(Strings.MetadataCopied);
     }
 
     private void ToggleBusy(bool isBusy)

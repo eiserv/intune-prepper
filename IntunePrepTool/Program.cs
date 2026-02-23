@@ -6,6 +6,8 @@ static class Program
     static void Main()
     {
         ApplicationConfiguration.Initialize();
-        Application.Run(new MainForm(Services.SettingsService.Load()));
+        var settings = Services.SettingsService.Load();
+        Strings.SetLanguage(settings.Language);
+        Application.Run(new MainForm(settings));
     }
 }

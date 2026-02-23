@@ -5,3 +5,10 @@ intune_autopilot_import_url: "https://intune.microsoft.com/#view/Microsoft_Intun
 auto_enroll_command: "%windir%\\system32\\deviceenroller.exe /c /AutoEnrollMDM"
 default_run_auto_enroll: false
 default_auto_enroll_only: false
+
+# UI language: "en" (English) or "de" (German)
+language: "de"
+
+# Set to true to open email drafts via Outlook COM (supports attachments).
+# When false (default), the OS default mail handler is used via mailto:.
+prefer_outlook_com: false

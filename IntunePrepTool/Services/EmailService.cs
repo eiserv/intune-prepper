@@ -5,13 +5,23 @@ namespace IntunePrepTool.Services;
 
 internal sealed class EmailService
 {
-    public bool OpenDraft(string recipient, string subject, string body, IReadOnlyList<string> attachmentPaths)
+    /// <summary>
+    /// Opens an email draft.
+    /// When <paramref name="preferOutlookCom"/> is true, Outlook COM automation is
+    /// tried first so that attachments can be added programmatically.
+    /// Otherwise (default) the OS-default mail handler is used via the mailto protocol.
+    /// </summary>
+    /// <returns>true when Outlook COM was used (attachments included).</returns>
+    public bool OpenDraft(string recipient, string subject, string body,
+        IReadOnlyList<string> attachmentPaths, bool preferOutlookCom = false)
     {
-        if (attachmentPaths.Count > 0 && TryOpenOutlookDraftWithAttachment(recipient, subject, body, attachmentPaths))
+        if (preferOutlookCom && attachmentPaths.Count > 0 &&
+            TryOpenOutlookDraftWithAttachment(recipient, subject, body, attachmentPaths))
         {
             return true;
         }
 
+        // Use mailto: – this opens whatever the user has set as default mail app.
         string mailto = BuildMailtoUri(recipient, subject, body);
         Process.Start(new ProcessStartInfo
         {
