@@ -304,6 +304,16 @@ internal sealed class MainForm : Form
                 }
             }
 
+            string readinessReport = _exportService.WriteIntuneReadinessReport(
+                _latestResult,
+                _latestEnrollmentResult,
+                _latestOutputFolder,
+                groupTag,
+                assignedUser,
+                autoEnrollOnly);
+            _latestAttachments.Add(readinessReport);
+            AppendStatus($"Intune readiness report saved to: {readinessReport}");
+
             EnableSecondaryActions();
             OpenOutputFolder();
             OpenEmailDraft();
