@@ -118,7 +118,7 @@ internal sealed class MainForm : Form
             Margin = new Padding(12, 8, 0, 8)
         };
 
-        Label modeLabel = new() { Text = "Workflow Mode", AutoSize = true, Anchor = AnchorStyles.Left };
+        Label modeLabel = new() { Text = "Workflow Mode", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
         FlowLayoutPanel modePanel = new() { AutoSize = true, Margin = new Padding(8, 4, 0, 8) };
 
         _autoEnrollOnlyCheckbox.Text = "Auto-enroll only (skip hash export)";
