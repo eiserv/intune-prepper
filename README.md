@@ -1,6 +1,6 @@
 # Intune Prep Tool
 
-Windows GUI tool for coworker-friendly Intune onboarding prep.
+Windows GUI tool for Intune onboarding prep.
 
 ## Features
 - Exports Autopilot hardware hash CSV (with Group Tag + Assigned User).
