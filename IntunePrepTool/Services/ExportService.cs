@@ -16,18 +16,38 @@ internal sealed class ExportService
     public string EnsureOutputFolder()
     {
         string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-        string basePath = string.IsNullOrWhiteSpace(desktop) || !Directory.Exists(desktop)
-            ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-            : desktop;
-
-        if (string.IsNullOrWhiteSpace(basePath))
+        if (string.IsNullOrWhiteSpace(desktop))
         {
-            basePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            desktop = string.IsNullOrWhiteSpace(userProfile)
+                ? Path.Combine(Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\", "Users", "Default", "Desktop")
+                : Path.Combine(userProfile, "Desktop");
         }
 
-        string outputFolder = Path.Combine(basePath, _settings.OutputFolderName);
-        Directory.CreateDirectory(outputFolder);
-        return outputFolder;
+        try
+        {
+            Directory.CreateDirectory(desktop);
+            string outputFolderOnDesktop = Path.Combine(desktop, _settings.OutputFolderName);
+            Directory.CreateDirectory(outputFolderOnDesktop);
+            return outputFolderOnDesktop;
+        }
+        catch
+        {
+            string fallbackBase = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrWhiteSpace(fallbackBase))
+            {
+                fallbackBase = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            }
+
+            if (string.IsNullOrWhiteSpace(fallbackBase))
+            {
+                fallbackBase = Path.GetTempPath();
+            }
+
+            string outputFolderFallback = Path.Combine(fallbackBase, _settings.OutputFolderName);
+            Directory.CreateDirectory(outputFolderFallback);
+            return outputFolderFallback;
+        }
     }
 
     public string WriteAutopilotCsv(
